@@ -1,41 +1,37 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { userSchema } from "./userSchema.js";
+import { validator } from "../validator-middleware.js";
 
 const SECRET_KEY = "titkos_kulcs";
 
-export function createUsersRoute() {
+export function createUsersRoute({ saveUser, getUserByEmail }) {
     const gamesRouter = express.Router();
 
-    gamesRouter.post("/register", async (req, res) => {
-        const { username, password } = req.body;
-        if (!username || !password) {
-            return res.status(400).send("Username and password are required");
-        }
-
+    gamesRouter.post("/register", validator(userSchema), async (req, res) => {
+        const { email, password } = req.body;
         try {
-            const hashedPassword = await bcrypt.hashSync(password, 10);
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await saveUser({ email, password: hashedPassword });
             res.status(201).send("User created successfully");
         } catch (err) {
+            console.error(err);
             res.status(500).send("Server error");
         }
     });
 
-    gamesRouter.post("/login", async (req, res) => {
-        const { username, password } = req.body;
-        if (!username || !password) {
-            return res.status(400).send("All fields are required");
-        }
-
+    gamesRouter.post("/login", validator(userSchema), async (req, res) => {
+        const { email, password } = req.body;
         try {
-            const user = {
-                username,
-                passwordHash: bcrypt.hashSync(password, 10),
-            };
-
-            const match = await bcrypt.compare(password, user.passwordHash);
+            const result = await getUserByEmail({ email });
+            if (!result) {
+                return res.status(401).send("Invalid credentials");
+            }
+            const userPassword = result.password;
+            const match = await bcrypt.compare(password, userPassword);
             if (match) {
-                const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
+                const token = jwt.sign({ userId: result.userId }, SECRET_KEY, {
                     expiresIn: "1h",
                 });
                 res.json({ token });
@@ -43,6 +39,7 @@ export function createUsersRoute() {
                 res.status(401).send("Invalid credentials");
             }
         } catch (err) {
+            console.error(err);
             res.status(500).send("Server error");
         }
     });

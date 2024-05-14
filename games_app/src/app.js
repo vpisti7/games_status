@@ -1,6 +1,7 @@
 import express from "express";
 import { createGamesRoute } from "./games/router.js";
-import { createUserRoute } from "./user/router.js";
+import { createUsersRoute } from "./user/router.js";
+import { errorHandler } from "./error-handling.js";
 
 export function createApp(dependences) {
     const app = express();
@@ -22,8 +23,12 @@ export function createApp(dependences) {
             res.locals.userId = 1;
             next();
         },
-        createUserRoute(dependences)
+        createUsersRoute(dependences)
     );
+
+    app.use((err, req, res, next) => {
+        errorHandler(err, req, res, next);
+    });
 
     return app;
 }

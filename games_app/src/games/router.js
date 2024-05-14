@@ -13,57 +13,43 @@ export function createGamesRoute({
 
     gamesRouter.get("", (req, res, next) => {
         loadGames({ userId: res.locals.userId })
-            .then((games) => {
-                res.json(games);
-            })
-            .catch(next);
+            .then((games) => res.json(games))
+            .catch((err) => next(err));
     });
 
-    gamesRouter.get("/:game", async (req, res, next) => {
-        try {
-            const game = await getGameByTitle({
-                game_name: req.params.game,
-                userId: res.locals.userId,
-            });
-            res.json(game);
-        } catch (err) {
-            next(err);
-        }
+    gamesRouter.get("/:game", (req, res, next) => {
+        getGameByTitle({
+            game_name: req.params.game,
+            userId: res.locals.userId,
+        })
+            .then((game) => res.json(game))
+            .catch((err) => next(err));
     });
 
     gamesRouter.delete("/:game", (req, res, next) => {
-        deleteGame({ game_name: req.params.game, userId: res.locals.userId })
-            .then(() => {
-                res.sendStatus(204);
-            })
-            .catch(next);
+        deleteGame({
+            game_name: req.params.game,
+            userId: res.locals.userId,
+        })
+            .then(() => res.sendStatus(204))
+            .catch((err) => next(err));
     });
 
-    gamesRouter.post("", parser(addGameZodSchema), async (req, res, next) => {
-        try {
-            await saveGame({ ...res.locals.parsed, userId: res.locals.userId });
-            res.sendStatus(201);
-        } catch (err) {
-            next(err);
-        }
+    gamesRouter.post("", parser(addGameZodSchema), (req, res, next) => {
+        saveGame({ ...res.locals.parsed, userId: res.locals.userId })
+            .then(() => res.sendStatus(201))
+            .catch((err) => next(err));
     });
 
-    gamesRouter.put(
-        "/:game",
-        parser(updateGameZodSchema),
-        async (req, res, next) => {
-            try {
-                await updateGame({
-                    ...res.locals.parsed,
-                    game_name: req.params.game,
-                    userId: res.locals.userId,
-                });
-                res.sendStatus(204);
-            } catch (err) {
-                next(err);
-            }
-        }
-    );
+    gamesRouter.put("/:game", parser(updateGameZodSchema), (req, res, next) => {
+        updateGame({
+            ...res.locals.parsed,
+            game_name: req.params.game,
+            userId: res.locals.userId,
+        })
+            .then(() => res.sendStatus(204))
+            .catch((err) => next(err));
+    });
 
     return gamesRouter;
 }
