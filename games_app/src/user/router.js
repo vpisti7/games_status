@@ -4,8 +4,6 @@ import jwt from "jsonwebtoken";
 import { userSchema } from "./userSchema.js";
 import { validator } from "../validator-middleware.js";
 
-const SECRET_KEY = "titkos_kulcs";
-
 export function createUsersRoute({ saveUser, getUserByEmail }) {
     const gamesRouter = express.Router();
 
@@ -31,9 +29,13 @@ export function createUsersRoute({ saveUser, getUserByEmail }) {
             const userPassword = result.password;
             const match = await bcrypt.compare(password, userPassword);
             if (match) {
-                const token = jwt.sign({ userId: result.userId }, SECRET_KEY, {
-                    expiresIn: "1h",
-                });
+                const token = jwt.sign(
+                    { userId: result.id },
+                    process.env.TOKEN_SECRET,
+                    {
+                        expiresIn: "300s",
+                    }
+                );
                 res.json({ token });
             } else {
                 res.status(401).send("Invalid credentials");
