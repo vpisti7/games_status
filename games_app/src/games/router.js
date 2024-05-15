@@ -10,9 +10,13 @@ export function createGamesRoute({
     deleteGame,
 }) {
     const gamesRouter = express.Router();
-
     gamesRouter.get("", (req, res, next) => {
-        loadGames({ userId: res.locals.userId })
+        const { finished, wantContinue } = req.query;
+        loadGames({
+            userId: res.locals.userId,
+            finished: finished,
+            wantContinue: wantContinue,
+        })
             .then((games) => res.json(games))
             .catch((err) => next(err));
     });

@@ -4,18 +4,28 @@ import { NoData, NotFoundError } from "../error-handling.js";
 export async function connectToSqlite(filepath, callback) {
     const db = new sqlite3.Database(filepath, (err) => {
         callback(err, {
-            loadGames: ({ userId }) => {
+            loadGames: ({ userId, wantContinue, finished }) => {
                 return new Promise((resolve, reject) => {
-                    db.all(
-                        "select * from games where user_id = ?",
-                        userId,
-                        (err, rows) => {
-                            if (err) {
-                                reject(err);
-                            }
+                    let sql = "select * from games where user_id = ?";
+                    const params = [userId];
+
+                    if (wantContinue !== undefined) {
+                        sql += " AND want_continue = ?";
+                        params.push(wantContinue);
+                    }
+
+                    if (finished !== undefined) {
+                        sql += " AND finished = ?";
+                        params.push(finished);
+                    }
+
+                    db.all(sql, params, (err, rows) => {
+                        if (err) {
+                            reject(err);
+                        } else {
                             resolve(rows);
                         }
-                    );
+                    });
                 });
             },
             async saveGame({

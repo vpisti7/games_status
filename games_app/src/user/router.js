@@ -33,7 +33,7 @@ export function createUsersRoute({ saveUser, getUserByEmail }) {
                     { userId: result.id },
                     process.env.TOKEN_SECRET,
                     {
-                        expiresIn: "300s",
+                        expiresIn: "600s",
                     }
                 );
                 res.json({ token });
