@@ -3,6 +3,7 @@ import { createGamesRoute } from "./games/router.js";
 import { createUsersRoute } from "./user/router.js";
 import { errorHandler } from "./error-handling.js";
 import jwt from "jsonwebtoken";
+import cors from "cors";
 
 const verifyToken = (req, res, next) => {
     const token = req.headers["authorization"].split(" ")[1];
@@ -25,6 +26,8 @@ export function createApp(dependences) {
     const app = express();
 
     app.use(express.json());
+
+    app.use(cors());
 
     app.use(
         "/games",

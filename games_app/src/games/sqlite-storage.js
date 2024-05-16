@@ -1,5 +1,5 @@
 import sqlite3 from "sqlite3";
-import { NoData, NotFoundError } from "../error-handling.js";
+import { AlreadyExist, NoData, NotFoundError } from "../error-handling.js";
 
 export async function connectToSqlite(filepath, callback) {
     const db = new sqlite3.Database(filepath, (err) => {
@@ -10,7 +10,7 @@ export async function connectToSqlite(filepath, callback) {
                     const params = [userId];
 
                     if (wantContinue !== undefined) {
-                        sql += " AND want_continue = ?";
+                        sql += " AND wantContinue = ?";
                         params.push(wantContinue);
                     }
 
@@ -35,27 +35,41 @@ export async function connectToSqlite(filepath, callback) {
                 userId,
             }) {
                 return new Promise((resolve, reject) => {
-                    let finished;
-                    if (completed_percent != 100) {
-                        finished = false;
-                    } else {
-                        finished = true;
-                    }
-                    db.run(
-                        "insert into games(game_name,completed_percent,finished,wantContinue,user_id) values (?, ?, ?, ?,?)",
-                        [
-                            game_name,
-                            completed_percent,
-                            finished,
-                            wantContinue,
-                            userId,
-                        ],
-                        (err) => {
+                    db.get(
+                        "SELECT * FROM games WHERE game_name = ? AND user_id = ?",
+                        [game_name, userId],
+                        (err, row) => {
                             if (err) {
                                 reject(err);
-                            } else {
-                                resolve();
+                                return;
                             }
+                            if (row) {
+                                reject(
+                                    new AlreadyExist(
+                                        "Game already exists for this user."
+                                    )
+                                );
+                                return;
+                            }
+
+                            let finished = completed_percent === 100;
+                            db.run(
+                                "insert into games(game_name, completed_percent, finished, wantContinue, user_id) values (?, ?, ?, ?, ?)",
+                                [
+                                    game_name,
+                                    completed_percent,
+                                    finished,
+                                    wantContinue,
+                                    userId,
+                                ],
+                                (err) => {
+                                    if (err) {
+                                        reject(err);
+                                    } else {
+                                        resolve();
+                                    }
+                                }
+                            );
                         }
                     );
                 });

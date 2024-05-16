@@ -28,6 +28,16 @@ export class NoData extends Error {
     }
 }
 
+export class AlreadyExist extends Error {
+    constructor(message) {
+        super(message);
+        this.name = this.constructor.name;
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, this.constructor);
+        }
+    }
+}
+
 function mapErrorToStatusCode(err) {
     switch (err.name) {
         case "NoData":
@@ -36,6 +46,8 @@ function mapErrorToStatusCode(err) {
             return 404;
         case "NotAuthorized":
             return 401;
+        case "AlreadyExist":
+            return 409;
         default:
             return 500;
     }

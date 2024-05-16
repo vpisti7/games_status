@@ -12,11 +12,19 @@ export function createUsersRoute({ saveUser, getUserByEmail }) {
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
             await saveUser({ email, password: hashedPassword });
-            res.status(201).send("User created successfully");
         } catch (err) {
             console.error(err);
-            res.status(500).send("Server error");
+            return res.status(500).send("Server error");
         }
+        const result = await getUserByEmail({ email });
+        const token = jwt.sign(
+            { userId: result.id },
+            process.env.TOKEN_SECRET,
+            {
+                expiresIn: "600s",
+            }
+        );
+        res.json({ token }).status(201);
     });
 
     gamesRouter.post("/login", validator(userSchema), async (req, res) => {
