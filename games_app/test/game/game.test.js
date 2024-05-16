@@ -1,90 +1,69 @@
-import { describe, it, beforeEach, afterEach } from "node:test";
+import { describe, it, before, after } from "node:test";
 import assert from "node:assert";
-import sqlite3 from "sqlite3";
 import { connectToSqlite } from "./../../src/games/sqlite-storage.js";
 
-let dbFunctions;
+describe("SQLite Database Tests", () => {
+    let dbFunctions;
 
-async function setupDatabase() {
-    console.log("Setting up in-memory database...");
-    return new Promise((resolve, reject) => {
-        connectToSqlite(":memory:", (err, functions) => {
-            if (err) {
-                console.error("Error connecting to SQLite:", err);
-                reject(err);
-                return;
-            }
-            dbFunctions = functions;
-            console.log("Database connected, setting up tables...");
-            db.run(
-                `
-                CREATE TABLE games (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    user_id INTEGER,
-                    game_name TEXT,
-                    completed_percent INTEGER,
-                    finished BOOLEAN,
-                    wantContinue BOOLEAN
-                );`,
-                (err) => {
-                    if (err) {
-                        console.error("Error creating tables:", err);
-                        reject(err);
-                    } else {
-                        console.log("Tables set up successfully.");
-                        resolve();
-                    }
-                }
-            );
-        });
-    });
-}
-
-async function teardownDatabase() {
-    return new Promise((resolve, reject) => {
-        if (dbFunctions && dbFunctions.db) {
-            dbFunctions.db.close((err) => {
+    it(async () => {
+        await new Promise((resolve, reject) => {
+            connectToSqlite("test.db", (err, functions) => {
                 if (err) {
                     reject(err);
-                } else {
-                    resolve();
                 }
+                dbFunctions = functions;
+
+                dbFunctions.db.run(
+                    `
+                    CREATE TABLE IF NOT EXISTS games (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        user_id INTEGER,
+                        game_name TEXT,
+                        completed_percent INTEGER,
+                        finished BOOLEAN,
+                        wantContinue BOOLEAN
+                    );`,
+                    (err) => {
+                        if (err) {
+                            reject(err);
+                        }
+                        resolve();
+                    }
+                );
             });
-        } else {
-            resolve();
-        }
-    });
-}
-
-beforeEach(async () => {
-    console.log("Before setupDatabase call");
-    await setupDatabase();
-    console.log("After setupDatabase call");
-});
-
-afterEach(async () => {
-    console.log("Before teardownDatabase call");
-    await teardownDatabase();
-    console.log("After teardownDatabase call");
-});
-
-describe("Database operations - loadGames", () => {
-    it("should load games for a specific user based on filters", async () => {
-        console.log("Test begins.");
+        });
         await dbFunctions.saveGame({
-            game_name: "Test Game",
-            completed_percent: 90,
+            game_name: "Sample Game",
+            completed_percent: 50,
             wantContinue: true,
             userId: 1,
         });
 
-        const games = await dbFunctions.loadGames({
+        const result = await dbFunctions.getGameByTitle({
+            game_name: "Sample Game",
             userId: 1,
-            wantContinue: true,
-            finished: false,
         });
-        console.log("Test ends.");
-        assert.strictEqual(games.length, 1);
-        assert.strictEqual(games[0].game_name, "Test Game");
+
+        assert.strictEqual(result.game_name, "Sample Game", "The game name should match the input");
+        assert.strictEqual(result.completed_percent, 50, "The completed percent should match the input");
+        assert.strictEqual(result.wantContinue, true, "The wantContinue flag should be true");
+    });
+
+    after(async () => {
+        console.log(dbFunctions)
+        await new Promise((resolve, reject) => {
+            // Eldobja a games táblát a tesztek után
+            dbFunctions.db.run("DROP TABLE IF EXISTS games", (err) => {
+                if (err) {
+                    reject(err);
+                }
+                dbFunctions.db.close((err) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve();
+                });
+            });
+        });
     });
 });
