@@ -297,7 +297,7 @@ function App() {
                                 <div className="row">
                                     <div className="col-md-8">
                                         <div className="row justify-content-center">
-                                            <div className="col-sm-5">
+                                            <div className="col-sm-4">
                                                 <form className="form-group">
                                                     <label
                                                         htmlFor="finished"
@@ -369,16 +369,7 @@ function App() {
                                                     />
                                                 </form>
                                             </div>
-                                            <div className="col-sm-2">
-                                                {" "}
-                                                <Button
-                                                    onClick={handleGetAll}
-                                                    className="btn btn-info mt-2"
-                                                >
-                                                    Játékok
-                                                </Button>
-                                            </div>
-                                            <div className="col-sm-5">
+                                            <div className="col-sm-4">
                                                 <form className="form-group">
                                                     <label
                                                         htmlFor="wantContinue"
@@ -450,6 +441,16 @@ function App() {
                                                     />
                                                 </form>
                                             </div>
+                                            <div className="col-sm-2">
+                                                {" "}
+                                                <Button
+                                                    onClick={handleGetAll}
+                                                    className="btn btn-info mt-2"
+                                                >
+                                                    Játékok
+                                                </Button>
+                                            </div>
+                                            <div className="col-sm-2"></div>
                                         </div>
                                     </div>
                                     <div className="col-sm-4">
