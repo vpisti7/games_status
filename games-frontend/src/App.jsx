@@ -301,7 +301,7 @@ function App() {
                                                 <form className="form-group">
                                                     <label
                                                         htmlFor="finished"
-                                                        className="form-check-label"
+                                                        className="form-check-label mx-2"
                                                     >
                                                         Befejezett
                                                     </label>
@@ -324,7 +324,7 @@ function App() {
                                                     <br></br>
                                                     <label
                                                         htmlFor="notfinished"
-                                                        className="form-check-label"
+                                                        className="form-check-label mx-2"
                                                     >
                                                         Folyamatban
                                                     </label>
@@ -347,7 +347,7 @@ function App() {
                                                     <br></br>
                                                     <label
                                                         htmlFor="dontcare"
-                                                        className="form-check-label"
+                                                        className="form-check-label mx-2"
                                                     >
                                                         Mindkettő
                                                     </label>
@@ -373,7 +373,7 @@ function App() {
                                                 <form className="form-group">
                                                     <label
                                                         htmlFor="wantContinue"
-                                                        className="form-check-label"
+                                                        className="form-check-label mx-2"
                                                     >
                                                         Folytat
                                                     </label>
@@ -396,7 +396,7 @@ function App() {
                                                     <br></br>
                                                     <label
                                                         htmlFor="dontwantcontinue"
-                                                        className="form-check-label"
+                                                        className="form-check-label mx-2"
                                                     >
                                                         Nem folytat
                                                     </label>
@@ -419,7 +419,7 @@ function App() {
                                                     <br></br>
                                                     <label
                                                         htmlFor="both"
-                                                        className="form-check-label"
+                                                        className="form-check-label mx-2"
                                                     >
                                                         Mindkettő
                                                     </label>
