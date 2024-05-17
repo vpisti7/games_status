@@ -16,8 +16,8 @@ body{
 
 POST http://localhost:8000/user/login
 body{
-"email": "emailcmi";,
-"password": "password"
+"email": "email cím";,
+"password": "jelszó"
 }
 Egy JWT tokent ad vissza
 
@@ -38,15 +38,22 @@ POST http://localhost:8000/games
 A finished és user_id érétke automatikusan állítódik
 {
 "game_name":"játék neve"
-"completed_percent":"teljesített %",
-"wantContinue":"Szeretnéd-e folytatni"
+"game_percent": Teljesített %,(szám)
+"wantContinue":"Szeretnéd-e folytatni"(true/false)
 }
 
 PUT http://localhost:8000/games/game
 {
-"game_percent":"Teljesített százalék",
+"game_percent": Teljesített %,(szám)
 "wantContinue":"true vagy false érték"
 }
 
 DELETE http://localhost:8000/games/game
 Játék törlése név alapján
+
+DELETE http://localhost:8000/user
+Felhasználó törlése -> elmenette adata törlésre kerül.
+{
+"email": "email cím";,
+"password": "jelszó"
+}

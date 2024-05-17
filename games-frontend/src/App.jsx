@@ -79,7 +79,7 @@ function App() {
             email: Email,
             password: Password,
         };
-        fetch("http://localhost:8000/user/delete", {
+        fetch("http://localhost:8000/user", {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

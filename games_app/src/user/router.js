@@ -57,7 +57,7 @@ export function createUsersRoute({
         }
     });
 
-    gamesRouter.delete("/delete", validator(userSchema), async (req, res) => {
+    gamesRouter.delete("", validator(userSchema), async (req, res) => {
         const { email, password } = req.body;
         try {
             const result = await getUserByEmail({ email });
