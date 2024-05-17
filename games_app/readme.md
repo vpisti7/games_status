@@ -3,6 +3,9 @@ Dokumentáció:
 Egy olyan API-t készítettem amivel tárolni tudok játékokat név szerint és mellettük tárolni az adott,
 játékban elért haladást és hogy szeretné-e az adott illető folytatni az adott játékot.
 
+Mielőtt használjuk az API-t létre kell hozni egy .env fájlt amibe egy TOKEN_SECRET-nek kelle lennie.
+PL: TOKEN_SECRET=ad4e759c1764fc6714f4a7ecbad47762c0e309ab274c6cefc092a0b7df7ada7328ac59101bf809c7e50470bdf3261f2dae26d1d94e728651a0e1c2e72a064a9b
+
 Felhasználó kezelés:
 
 POST http://localhost:8000/user/register
