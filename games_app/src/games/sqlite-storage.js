@@ -219,6 +219,36 @@ export async function connectToSqlite(filepath, callback) {
                     );
                 });
             },
+            async deleteUser({ email }) {
+                return new Promise((resolve, reject) => {
+                    db.run(
+                        "DELETE FROM users WHERE email = ?",
+                        [email],
+                        (err) => {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve();
+                            }
+                        }
+                    );
+                });
+            },
+            async deleteUserGames({ userId }) {
+                return new Promise((resolve, reject) => {
+                    db.run(
+                        "DELETE FROM games WHERE user_id = ?",
+                        [userId],
+                        (err) => {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                resolve();
+                            }
+                        }
+                    );
+                });
+            },
         });
     });
 }

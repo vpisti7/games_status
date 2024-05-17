@@ -57,13 +57,51 @@ function App() {
             body: JSON.stringify(userData),
         })
             .then((response) => {
+                if (response.status === 401) {
+                    throw new Error(
+                        "Authentication failed: Invalid credentials"
+                    );
+                }
                 return response.json();
             })
             .then((data) => {
                 console.log("Success:", data);
                 setToken(data.token);
             })
-            .catch((error) => console.error("Error:", error));
+            .catch((error) => {
+                console.error("Error:", error);
+            });
+    };
+
+    const handleUserDelete = (e) => {
+        e.preventDefault();
+        const userData = {
+            email: Email,
+            password: Password,
+        };
+        fetch("http://localhost:8000/user/delete", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userData),
+        })
+            .then((response) => {
+                if (response.status === 401) {
+                    throw new Error(
+                        "Authentication failed: Invalid credentials"
+                    );
+                }
+                if (response.status === 204) {
+                    console.log("Success: User deleted");
+                    setToken(null);
+                    return;
+                }
+                throw new Error("Failed to delete user due to server error");
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
     };
 
     const handleLogOut = () => {
@@ -241,6 +279,12 @@ function App() {
                                 onClick={handleLogOut}
                             >
                                 Kijelentkezés
+                            </Button>
+                            <Button
+                                className="btn btn-danger mb-2 mx-1"
+                                onClick={handleUserDelete}
+                            >
+                                Törlés
                             </Button>
                         </form>
                     </div>

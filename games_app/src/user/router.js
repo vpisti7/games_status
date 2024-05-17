@@ -4,7 +4,12 @@ import jwt from "jsonwebtoken";
 import { userSchema } from "./userSchema.js";
 import { validator } from "../validator-middleware.js";
 
-export function createUsersRoute({ saveUser, getUserByEmail }) {
+export function createUsersRoute({
+    saveUser,
+    getUserByEmail,
+    deleteUser,
+    deleteUserGames,
+}) {
     const gamesRouter = express.Router();
 
     gamesRouter.post("/register", validator(userSchema), async (req, res) => {
@@ -31,9 +36,7 @@ export function createUsersRoute({ saveUser, getUserByEmail }) {
         const { email, password } = req.body;
         try {
             const result = await getUserByEmail({ email });
-            if (!result) {
-                return res.status(401).send("Invalid credentials");
-            }
+
             const userPassword = result.password;
             const match = await bcrypt.compare(password, userPassword);
             if (match) {
@@ -50,7 +53,25 @@ export function createUsersRoute({ saveUser, getUserByEmail }) {
             }
         } catch (err) {
             console.error(err);
-            res.status(500).send("Server error");
+            res.status(401).send("Invalid credentials");
+        }
+    });
+
+    gamesRouter.delete("/delete", validator(userSchema), async (req, res) => {
+        const { email, password } = req.body;
+        try {
+            const result = await getUserByEmail({ email });
+            const match = await bcrypt.compare(password, result.password);
+            if (match) {
+                await deleteUser({ email: result.email });
+                await deleteUserGames({ userId: result.id });
+                res.status(204).send();
+            } else {
+                res.status(401).send("Invalid credentials");
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(401).send("Invalid credentials");
         }
     });
 
