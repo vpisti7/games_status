@@ -1,69 +1,94 @@
 import { describe, it, before, after } from "node:test";
-import assert from "node:assert";
+import assert, { AssertionError } from "node:assert";
 import { connectToSqlite } from "./../../src/games/sqlite-storage.js";
+import { AlreadyExist } from "../../src/error-handling.js";
 
-describe("SQLite Database Tests", () => {
-    let dbFunctions;
-
-    it(async () => {
-        await new Promise((resolve, reject) => {
-            connectToSqlite("test.db", (err, functions) => {
-                if (err) {
-                    reject(err);
-                }
-                dbFunctions = functions;
-
-                dbFunctions.db.run(
-                    `
-                    CREATE TABLE IF NOT EXISTS games (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        user_id INTEGER,
-                        game_name TEXT,
-                        completed_percent INTEGER,
-                        finished BOOLEAN,
-                        wantContinue BOOLEAN
-                    );`,
-                    (err) => {
-                        if (err) {
-                            reject(err);
-                        }
-                        resolve();
+describe("saveGame", () => {
+    it("add a game to games when the database is empty", async () => {
+        const { deleteUserGames, saveGame, loadGames } = await new Promise(
+            (resolve, reject) => {
+                connectToSqlite("test.db", (err, functions) => {
+                    if (err) {
+                        reject(err);
                     }
-                );
-            });
-        });
-        await dbFunctions.saveGame({
-            game_name: "Sample Game",
-            completed_percent: 50,
+                    resolve(functions);
+                });
+            }
+        );
+
+        await deleteUserGames({ userId: 1 });
+
+        await saveGame({
+            game_name: "D",
+            completed_percent: 0,
             wantContinue: true,
             userId: 1,
         });
 
-        const result = await dbFunctions.getGameByTitle({
-            game_name: "Sample Game",
-            userId: 1,
-        });
+        const games = await loadGames({ userId: 1 });
 
-        assert.strictEqual(result.game_name, "Sample Game", "The game name should match the input");
-        assert.strictEqual(result.completed_percent, 50, "The completed percent should match the input");
-        assert.strictEqual(result.wantContinue, true, "The wantContinue flag should be true");
+        const { game_name, id, wantContinue, finished, completed_percent } =
+            games[0];
+
+        assert.strictEqual(game_name, "D");
+        assert.strictEqual(completed_percent, 0);
+        assert.strictEqual(wantContinue, 1);
+        assert.strictEqual(id, 1);
+        assert.strictEqual(finished, 0);
+
+        try {
+            const game = await saveGame({
+                game_name: "D",
+                completed_percent: 0,
+                wantContinue: true,
+                userId: 1,
+            });
+        } catch (err) {
+            assert(err instanceof AlreadyExist);
+        }
     });
 
-    after(async () => {
-        console.log(dbFunctions)
-        await new Promise((resolve, reject) => {
-            // Eldobja a games táblát a tesztek után
-            dbFunctions.db.run("DROP TABLE IF EXISTS games", (err) => {
-                if (err) {
-                    reject(err);
-                }
-                dbFunctions.db.close((err) => {
+    it("add a game when a game already exist the same name", async () => {
+        const { deleteUserGames, saveGame, loadGames } = await new Promise(
+            (resolve, reject) => {
+                connectToSqlite("test.db", (err, functions) => {
                     if (err) {
                         reject(err);
                     }
-                    resolve();
+                    resolve(functions);
                 });
-            });
+            }
+        );
+
+        await deleteUserGames({ userId: 1 });
+
+        await saveGame({
+            game_name: "D",
+            completed_percent: 0,
+            wantContinue: true,
+            userId: 1,
         });
+
+        const games = await loadGames({ userId: 1 });
+
+        const { game_name, id, wantContinue, finished, completed_percent } =
+            games[0];
+
+        assert.strictEqual(game_name, "D");
+        assert.strictEqual(completed_percent, 0);
+        assert.strictEqual(wantContinue, 1);
+        assert.strictEqual(id, 1);
+        assert.strictEqual(finished, 0);
+
+        try {
+            const game = await saveGame({
+                game_name: "D",
+                completed_percent: 0,
+                wantContinue: true,
+                userId: 1,
+            });
+        } catch (err) {
+            assert(err instanceof AlreadyExist);
+        }
     });
 });
